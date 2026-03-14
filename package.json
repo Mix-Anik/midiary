@@ -1,0 +1,25 @@
+{
+  "name": "midiary",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Your personal piano session diary. Save, listen, track, your visualized MIDI recordings.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mix-Anik/midiary.git"
+  },
+  "author": "Mix-Anik",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Mix-Anik/midiary/issues"
+  },
+  "homepage": "https://github.com/Mix-Anik/midiary#readme",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\"",
+    "build": "pnpm --filter shared build && pnpm --filter frontend build && pnpm --filter backend build",
+    "lint": "pnpm --recursive lint",
+    "type-check": "pnpm --recursive type-check"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
