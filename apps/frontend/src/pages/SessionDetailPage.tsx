@@ -14,13 +14,13 @@ import { AudioPlayer } from '../components/AudioPlayer';
 import { ConnectedTimelineBar } from '../components/TimelineBar';
 import { BookmarkModal } from '../components/BookmarkModal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { sessionsApi } from '../api/client';
 import { formatDate } from '../utils/format';
 import { getRegisteredPlugins } from '../plugins/registry';
 import type { SessionWidgetProps, PianoRollOverlayProps } from '@midiary/shared';
 import { usePlayerStore } from '../store/player';
+import { PianoRoll } from '../components/PianoRoll';
 
 export function SessionDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -93,16 +93,6 @@ export function SessionDetailPage() {
 
   const audioSrc = sessionsApi.audioUrl(session.id);
   const plugins = getRegisteredPlugins();
-
-  // Piano roll overlay props (placeholder values — Phase 5 fills in real canvas dims)
-  const overlayProps: PianoRollOverlayProps = {
-    currentTime: 0,
-    duration: session.durationMs ? session.durationMs / 1000 : 0,
-    canvasWidth: 0,
-    canvasHeight: 0,
-    pitchToX: (midi) => midi,
-    timeToY: (_secs, _cur, _h) => 0,
-  };
 
   const sidebarWidgetProps: SessionWidgetProps = { sessionId: session.id, session };
 
@@ -198,16 +188,21 @@ export function SessionDetailPage() {
             <TimelineBarWithPlugins session={session} />
           </div>
 
-          {/* Piano roll canvas — filled in Phase 5 */}
+          {/* Piano roll canvas */}
           <div className="flex-1 min-h-0 px-4 pb-4 pt-0">
-            <PianoRollArea
-              sessionId={session.id}
-              pluginOverlays={plugins
-                .filter((p) => p.PianoRollOverlay)
-                .map((p) => {
-                  const Overlay = p.PianoRollOverlay as React.FC<PianoRollOverlayProps>;
-                  return <Overlay key={p.manifest.id} {...overlayProps} />;
-                })}
+            <PianoRoll
+              midiUrl={sessionsApi.midiUrl(session.id)}
+              duration={session.durationMs ? session.durationMs / 1000 : 0}
+              renderOverlays={(props) => (
+                <>
+                  {plugins
+                    .filter((p) => p.PianoRollOverlay)
+                    .map((p) => {
+                      const Overlay = p.PianoRollOverlay as React.FC<PianoRollOverlayProps>;
+                      return <Overlay key={p.manifest.id} {...props} />;
+                    })}
+                </>
+              )}
             />
           </div>
         </div>
@@ -246,7 +241,7 @@ export function SessionDetailPage() {
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function TimelineBarWithPlugins({ session }: { session: SessionWithBookmarkChips }) {
+function TimelineBarWithPlugins(_: { session: SessionWithBookmarkChips }) {
   const plugins = getRegisteredPlugins();
   const currentTime = usePlayerStore((s) => s.currentTime);
   const duration = usePlayerStore((s) => s.duration);
@@ -270,29 +265,3 @@ function TimelineBarWithPlugins({ session }: { session: SessionWithBookmarkChips
   return <ConnectedTimelineBar markers={markers.length > 0 ? <>{markers}</> : undefined} />;
 }
 
-/** Placeholder for the piano roll canvas — fully implemented in Phase 5. */
-function PianoRollArea({
-  sessionId,
-  pluginOverlays,
-}: {
-  sessionId: string;
-  pluginOverlays: React.ReactNode[];
-}) {
-  return (
-    <div
-      id={`piano-roll-${sessionId}`}
-      className="relative w-full h-full bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg overflow-hidden"
-      aria-label="Piano roll visualisation"
-    >
-      {/* Phase 5: PianoRoll canvas component rendered here */}
-      <div className="absolute inset-0 flex items-center justify-center text-[var(--text-muted)] text-sm select-none">
-        <span>Piano roll — implemented in Phase 5</span>
-      </div>
-
-      {/* Plugin overlay layer (absolute, on top of canvas) */}
-      <div className="absolute inset-0 pointer-events-none">
-        {pluginOverlays}
-      </div>
-    </div>
-  );
-}
