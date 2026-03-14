@@ -1,3 +1,5 @@
+import type { SessionBookmarkChip } from './bookmark.js';
+
 // ─── Session ─────────────────────────────────────────────────────────────────
 
 export interface Session {
@@ -31,6 +33,15 @@ export interface UpdateSessionDto {
   description?: string;
   /** ISO 8601 date string */
   recordedAt?: string;
+}
+
+/**
+ * Session enriched with bookmark chip data.
+ * Returned by GET /sessions and GET /sessions/:id so the frontend
+ * can show group indicators without a separate API call.
+ */
+export interface SessionWithBookmarkChips extends Session {
+  bookmarkChips: SessionBookmarkChip[];
 }
 
 // ─── App Preferences ─────────────────────────────────────────────────────────
